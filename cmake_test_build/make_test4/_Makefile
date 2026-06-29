@@ -1,0 +1,43 @@
+CC = clang++
+
+# c++ compiler options
+CXXFLAGS = -Wall -O2
+
+# 링커 옵션
+LDFLAGS = 
+
+# include 옵션 - -I<헤더파일경로>
+INCLUDE = -Iinclude
+
+# source file dir
+SRC_DIR = ./src
+
+# object file dir
+OBJ_DIR = ./obj
+
+# 생성하려는 실행 파일 이름
+TARGET = main
+
+# wildcard => *로 .cc인 파일을 출력하기 위한 함수 호출
+# notdir 로 dir이 아닌 파일만 필터링 -> ./src/main.cc 가 main.cc로 바뀜.
+SRCS = $(notdir $(wildcard $(SRC_DIR)/*.cc))
+
+# SRCS의 .cc를 .o로 변경하는 역할
+OBJS = $(SRCS:.cc=.o)
+
+# 상대 경로를 붙인 Obj 파일 목록
+OBJECTS = $(patsubst %.o, $(OBJ_DIR)/%.o, $(OBJS))
+DEPS = $(OBJECTS:.o=.d)
+
+$(OBJ_DIR)/%.o : $(SRC_DIR)/%.cc
+	$(CC) $(CXXFLAGS) $(INCLUDE) -c $< -o $@ -MD $(LDFLAGS)
+
+$(TARGET) : $(OBJECTS)
+	$(CC) $(CXXFLAGS) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
+
+.PHONY: clean
+clean:
+	rm -f $(OBJECTS) $(DEPS) $(TARGET)
+
+-include $(DEPS)
+
